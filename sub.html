@@ -1,88 +1,222 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Happy Store</title>
-<style>
-  body { font-family: Arial, sans-serif; background:#f5f5f5; padding:20px; }
-  .login, .form-container { max-width:400px; margin: 50px auto; background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
-  input, select { width:100%; padding:10px; margin:10px 0; border-radius:6px; border:1px solid #ccc; }
-  button { width:100%; padding:12px; border:none; border-radius:6px; background:#FF002F; color:white; cursor:pointer; font-weight:bold; }
-  button:hover { background:#cc0026; }
-</style>
-</head>
-<body>
+<!DOCTYPE html>  
+<html lang="es">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>Admin Happy Store</title>  
+  
+<style>  
+  
+body{   
+font-family: Arial, sans-serif;   
+background:#f5f5f5;   
+padding:20px;   
+}  
+  
+/* CONTENEDORES */  
+.login, .form-container{   
+max-width:420px;   
+margin:50px auto;   
+background:#fff;   
+padding:20px;   
+border-radius:12px;   
+box-shadow:0 4px 10px rgba(0,0,0,0.1);   
+}  
+  
+/* IMPORTANTE PARA POSICIONAR LA X */  
+.form-container{  
+position:relative;  
+}  
+  
+/* INPUTS */
+input, select, textarea{   
+width:100%;   
+padding:10px;   
+margin:10px 0;   
+border-radius:6px;   
+border:1px solid #ccc;
 
-<div class="login" id="loginBox">
-  <h2>Admin Login</h2>
-  <input type="text" id="user" placeholder="Usuario">
-  <input type="password" id="pass" placeholder="Contraseña">
-  <button onclick="login()">Entrar</button>
-</div>
+/* 🔧 CORRECCION */
+box-sizing:border-box;
 
-<div class="form-container" id="adminForm" style="display:none;">
-  <h2>Agregar Producto</h2>
-  <input type="text" id="codigo" placeholder="Código del producto">
-  <input type="text" id="nombre" placeholder="Nombre">
-  <textarea id="descripcion" placeholder="Descripción"></textarea>
-  <input type="number" id="precio" placeholder="Precio">
-  <input type="number" id="valoracion" placeholder="Valoración (0-10)" min="0" max="10">
-  <select id="estado">
-    <option value="Disponible">Disponible</option>
-    <option value="Reservado">Reservado</option>
-    <option value="Vendido">Vendido</option>
-  </select>
-  <input type="url" id="img1" placeholder="URL imagen 1">
-  <input type="url" id="img2" placeholder="URL imagen 2">
-  <input type="url" id="img3" placeholder="URL imagen 3">
-  <input type="url" id="img4" placeholder="URL imagen 4">
-  <input type="url" id="img5" placeholder="URL imagen 5">
-  <button onclick="agregarProducto()">Agregar Producto</button>
-</div>
-
-<script>
-  // Login simple
-  function login() {
-    const user = document.getElementById('user').value;
-    const pass = document.getElementById('pass').value;
-    if(user === 'admin' && pass === '1234'){ // puedes cambiar usuario y contraseña
-      document.getElementById('loginBox').style.display='none';
-      document.getElementById('adminForm').style.display='block';
-    } else {
-      alert('Usuario o contraseña incorrectos');
-    }
-  }
-
-  // Función para enviar el producto a Google Apps Script
-  function agregarProducto() {
-    const producto = {
-      codigo: document.getElementById('codigo').value,
-      nombre: document.getElementById('nombre').value,
-      descripcion: document.getElementById('descripcion').value,
-      precio: document.getElementById('precio').value,
-      valoracion: document.getElementById('valoracion').value,
-      estado: document.getElementById('estado').value,
-      img1: document.getElementById('img1').value,
-      img2: document.getElementById('img2').value,
-      img3: document.getElementById('img3').value,
-      img4: document.getElementById('img4').value,
-      img5: document.getElementById('img5').value
-    };
-
-    fetch('https://script.google.com/macros/s/AKfycbz5jmczBym2G_VaClZiNriAqYTpF-6qDSnRzWhRaSNHtGlDHECy03PhJT0polNG00endw/exec', {
-      method:'POST',
-      body: JSON.stringify({action:'agregar', producto: producto})
-    })
-    .then(res=>res.json())
-    .then(data=>{
-      if(data.success){
-        alert('Producto agregado correctamente');
-        document.getElementById('adminForm').reset();
-      } else alert(data.mensaje);
-    });
-  }
-</script>
-
-</body>
+}  
+  
+/* BOTONES GENERALES */  
+button{   
+width:100%;   
+padding:12px;   
+border:none;   
+border-radius:6px;   
+background:#FF002F;   
+color:white;   
+cursor:pointer;   
+font-weight:bold;   
+}  
+  
+button:hover{   
+background:#cc0026;   
+}  
+  
+h2{  
+text-align:center;  
+}  
+  
+.preview{  
+width:100%;  
+margin-bottom:10px;  
+border-radius:8px;  
+display:block;  
+}  
+  
+/* BOTON X CERRAR SESION */  
+.logout-btn{  
+position:absolute;  
+top:8px;  
+right:8px;  
+background:#FF002F;  
+color:white;  
+border:none;  
+width:34px;  
+height:34px;  
+border-radius:6px;  
+display:flex;  
+align-items:center;  
+justify-content:center;  
+font-size:18px;  
+font-weight:bold;  
+cursor:pointer;  
+transition:0.2s;  
+}  
+  
+.logout-btn:hover{  
+background:#cc0026;  
+transform:scale(1.05);  
+}  
+  
+</style>  
+</head>  
+<body>  
+  
+<!-- LOGIN -->  
+<div class="login" id="loginBox">  
+<h2>Admin Login</h2>  
+  
+<input type="text" id="user" placeholder="Usuario">  
+<input type="password" id="pass" placeholder="Contraseña">  
+  
+<button onclick="login()">Entrar</button>  
+</div>  
+  
+<!-- PANEL -->  
+<div class="form-container" id="adminForm" style="display:none;">  
+  
+<button class="logout-btn" onclick="logout()" title="Cerrar sesión">✕</button>  
+  
+<h2>Agregar Producto</h2>  
+  
+<form id="formProducto">  
+  
+<input type="text" id="codigo" placeholder="Código del producto">  
+<input type="text" id="nombre" placeholder="Nombre">  
+  
+<textarea id="descripcion" placeholder="Descripción"></textarea>  
+  
+<input type="number" id="precio" placeholder="Precio">  
+  
+<input type="number" id="valoracion" placeholder="Valoración (0-10)" min="0" max="10">  
+  
+<select id="estado">  
+<option value="Disponible">Disponible</option>  
+<option value="Reservado">Reservado</option>  
+<option value="Vendido">Vendido</option>  
+</select>  
+  
+<select id="visibilidad">  
+<option value="publico">Público</option>  
+<option value="privado">Privado</option>  
+</select>  
+  
+<input type="url" id="img1" placeholder="URL imagen 1" oninput="previewImg('img1','prev1')">  
+<img id="prev1" class="preview">  
+  
+<input type="url" id="img2" placeholder="URL imagen 2" oninput="previewImg('img2','prev2')">  
+<img id="prev2" class="preview">  
+  
+<input type="url" id="img3" placeholder="URL imagen 3" oninput="previewImg('img3','prev3')">  
+<img id="prev3" class="preview">  
+  
+<input type="url" id="img4" placeholder="URL imagen 4" oninput="previewImg('img4','prev4')">  
+<img id="prev4" class="preview">  
+  
+<input type="url" id="img5" placeholder="URL imagen 5" oninput="previewImg('img5','prev5')">  
+<img id="prev5" class="preview">  
+  
+<button type="button" onclick="agregarProducto()" id="btnGuardar">
+Agregar Producto  
+</button>  
+  
+</form>  
+</div>  
+  
+<script>  
+  
+document.addEventListener("keypress", function(e){  
+if(e.key === "Enter"){  
+login();  
+}  
+});  
+  
+window.onload = function(){  
+if(localStorage.getItem("adminLogin") === "true"){  
+mostrarPanel();  
+}  
+}  
+  
+function mostrarPanel(){  
+document.getElementById('loginBox').style.display='none';  
+document.getElementById('adminForm').style.display='block';  
+}  
+  
+function login(){  
+const user = document.getElementById('user').value;  
+const pass = document.getElementById('pass').value;  
+  
+if(user === "admin" && pass === "1234"){  
+localStorage.setItem("adminLogin","true");  
+mostrarPanel();  
+}else{  
+alert("Usuario o contraseña incorrectos");  
+}  
+}  
+  
+function logout(){  
+if(!confirm("¿Seguro que deseas cerrar sesión?")){  
+return;  
+}  
+  
+localStorage.removeItem("adminLogin");  
+document.getElementById('adminForm').style.display='none';  
+document.getElementById('loginBox').style.display='block';  
+}  
+  
+function previewImg(inputId,imgId){  
+document.getElementById(imgId).src =
+document.getElementById(inputId).value;  
+}  
+  
+function agregarProducto(){  
+const btn = document.getElementById("btnGuardar");  
+btn.style.background="#00b894";  
+btn.innerText="Subiendo...";  
+  
+setTimeout(()=>{  
+btn.style.background="#FF002F";  
+btn.innerText="Agregar Producto";  
+alert("Producto agregado (demo)");  
+},1500);  
+}  
+  
+</script>  
+  
+</body>  
 </html>
