@@ -37,6 +37,32 @@ border:1px solid #ccc;
 box-sizing:border-box;
 }
 
+/* INPUT PASSWORD CON OJO */
+.password-box{
+position:relative;
+}
+
+.password-box input{
+padding-right:45px;
+}
+
+/* ICONO OJO */
+.eye-btn{
+position:absolute;
+right:5px;
+top:50%;
+transform:translateY(-50%);
+background:none;
+border:none;
+cursor:pointer;
+width:35px;
+height:35px;
+padding:0;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
 /* BOTONES */
 button{
 width:100%;
@@ -92,7 +118,30 @@ cursor:pointer;
 <h2>Admin Login</h2>
 
 <input type="text" id="user" placeholder="Usuario">
+
+<div class="password-box">
+
 <input type="password" id="pass" placeholder="Contraseña">
+
+<button type="button" id="togglePass" class="eye-btn">
+
+<!-- ICONO OJO SVG PROFESIONAL -->
+<svg xmlns="http://www.w3.org/2000/svg" 
+width="22" height="22" 
+viewBox="0 0 24 24" 
+fill="none" 
+stroke="#555" 
+stroke-width="2" 
+stroke-linecap="round" 
+stroke-linejoin="round">
+
+<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+<circle cx="12" cy="12" r="3"/>
+
+</svg>
+
+</button>
+</div>
 
 <button onclick="login()">Entrar</button>
 </div>
@@ -178,6 +227,30 @@ function logout(){
 localStorage.removeItem("adminLogin");
 location.reload();
 }
+
+/* OJO PASSWORD */
+const passInput = document.getElementById("pass");
+const toggleBtn = document.getElementById("togglePass");
+
+toggleBtn.addEventListener("mousedown", () => {
+passInput.type = "text";
+});
+
+toggleBtn.addEventListener("mouseup", () => {
+passInput.type = "password";
+});
+
+toggleBtn.addEventListener("mouseleave", () => {
+passInput.type = "password";
+});
+
+toggleBtn.addEventListener("touchstart", () => {
+passInput.type = "text";
+});
+
+toggleBtn.addEventListener("touchend", () => {
+passInput.type = "password";
+});
 
 /* PREVIEW */
 function previewImg(inputId,imgId){
