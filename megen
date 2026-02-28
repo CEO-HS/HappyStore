@@ -1,0 +1,212 @@
+<!DOCTYPE html>  
+<html lang="es">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>Admin Happy Store</title>  
+<style>  
+body{font-family:Arial,sans-serif;background:#f5f5f5;padding:20px;}  
+.login,.form-container{max-width:420px;margin:50px auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);}  
+.form-container{position:relative;}  
+input,select,textarea{width:100%;padding:10px;margin:10px 0;border-radius:6px;border:1px solid #ccc;box-sizing:border-box;}  
+.password-box{position:relative;}  
+.password-box input{padding-right:45px;}  
+.eye-btn{position:absolute;right:5px;top:50%;transform:translateY(-50%);background:transparent!important;border:none;cursor:pointer;width:35px;height:35px;display:flex;align-items:center;justify-content:center;}  
+button{width:100%;padding:12px;border:none;border-radius:6px;background:#FF002F;color:white;cursor:pointer;font-weight:bold;}  
+button:hover{background:#cc0026;}  
+h2{text-align:center;}  
+.preview{width:100%;margin-bottom:10px;border-radius:8px;display:block;}  
+.logout-btn{position:absolute;top:8px;right:8px;background:#FF002F;color:white;border:none;width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;cursor:pointer;}  
+</style>  
+</head>  
+<body>  
+  
+<!-- LOGIN -->  
+<div class="login" id="loginBox">  
+<h2>Admin Login</h2>  
+<input type="text" id="user" placeholder="Usuario">  
+<div class="password-box">  
+<input type="password" id="pass" placeholder="Contraseña">  
+<button type="button" id="togglePass" class="eye-btn">  
+<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">  
+<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>  
+<circle cx="12" cy="12" r="3"/>  
+</svg>  
+</button>  
+</div>  
+<button onclick="login()">Entrar</button>  
+</div>  
+  
+<!-- PANEL -->  
+<div class="form-container" id="adminForm" style="display:none;">  
+<button class="logout-btn" onclick="logout()">✕</button>  
+<h2>Agregar Producto</h2>  
+<form id="formProducto">  
+<input type="text" id="nombre" placeholder="Nombre" required>  
+<textarea id="descripcion" placeholder="Descripción"></textarea>  
+<input type="number" id="precio" placeholder="Precio">  
+<input type="number" id="valoracion" placeholder="Valoración (0-10)" min="0" max="10">  
+<select id="estado">  
+<option value="Disponible">Disponible</option>  
+<option value="Reservado">Reservado</option>  
+<option value="Vendido">Vendido</option>  
+</select>  
+<select id="visibilidad">  
+<option value="publico">Público</option>  
+<option value="privado">Privado</option>  
+</select>  
+  
+<!-- INPUT FILES -->  
+<input type="file" id="file1" class="fileInput">  
+<img id="img1" class="preview">  
+<input type="file" id="file2" class="fileInput">  
+<img id="img2" class="preview">  
+<input type="file" id="file3" class="fileInput">  
+<img id="img3" class="preview">  
+<input type="file" id="file4" class="fileInput">  
+<img id="img4" class="preview">  
+<input type="file" id="file5" class="fileInput">  
+<img id="img5" class="preview">  
+  
+<button type="button" onclick="agregarProducto()" id="btnGuardar">Agregar Producto</button>  
+</form>  
+</div>  
+  
+<script>  
+// -------- LOGIN --------  
+function login(){  
+    const user=document.getElementById('user').value;  
+    const pass=document.getElementById('pass').value;  
+    if(user==="admin" && pass==="1234"){  
+        localStorage.setItem("adminLogin","true");  
+        mostrarPanel();  
+    }else{  
+        alert("Usuario incorrecto");  
+    }  
+}  
+function mostrarPanel(){  
+    document.getElementById('loginBox').style.display='none';  
+    document.getElementById('adminForm').style.display='block';  
+}  
+window.onload=function(){  
+    if(localStorage.getItem("adminLogin")==="true") mostrarPanel();  
+}  
+function logout(){  
+    localStorage.removeItem("adminLogin");  
+    location.reload();  
+}  
+  
+// -------- OJO PASSWORD --------  
+const passInput=document.getElementById("pass");  
+const toggleBtn=document.getElementById("togglePass");  
+toggleBtn.addEventListener("mousedown",()=>{passInput.type="text";});  
+toggleBtn.addEventListener("mouseup",()=>{passInput.type="password";});  
+toggleBtn.addEventListener("mouseleave",()=>{passInput.type="password";});  
+toggleBtn.addEventListener("touchstart",()=>{passInput.type="text";});  
+toggleBtn.addEventListener("touchend",()=>{passInput.type="password";});  
+  
+// -------- IMG UPLOAD PARALLEL --------  
+const IMGBB_KEY="75e1c4c1e2ecce08add2221e38311f82";  
+  
+async function uploadSingle(file){  
+    const formData=new FormData();  
+    formData.append("image",file);  
+    const res=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`,{method:"POST",body:formData});  
+    const data=await res.json();  
+    if(data.success) return data.data.url;  
+    else throw new Error("Error al subir imagen");  
+}  
+  
+async function uploadAllFiles(){  
+    const files=document.querySelectorAll(".fileInput");  
+    const urls=[];  
+    for(const f of files){  
+        if(f.files[0]){  
+            try{  
+                const url=await uploadSingle(f.files[0]);  
+                urls.push(url);  
+                const imgPrev=document.getElementById(f.id.replace("file","img"));  
+                imgPrev.src=url;  
+                imgPrev.dataset.url=url;  
+            }catch(e){  
+                alert("Error subiendo imagen: "+f.id);  
+                urls.push("");  
+            }  
+        }else urls.push("");  
+    }  
+    return urls;  
+}  
+  
+// -------- AGREGAR PRODUCTO --------  
+async function agregarProducto(){
+    const nombre = document.getElementById('nombre').value.trim();
+    const precio = document.getElementById('precio').value.trim();
+    const valoracion = document.getElementById('valoracion').value.trim();
+    const files = document.querySelectorAll(".fileInput");
+    
+    // Validaciones
+    if(!nombre){
+        alert("El nombre es obligatorio");
+        return;
+    }
+    if(!precio || isNaN(precio) || Number(precio) <= 0){
+        alert("El precio debe ser un número mayor a 0");
+        return;
+    }
+    if(!valoracion || isNaN(valoracion) || Number(valoracion) < 0 || Number(valoracion) > 10){
+        alert("La valoración debe estar entre 0 y 10");
+        return;
+    }
+    // Validar al menos 1 foto
+    const hayFoto = Array.from(files).some(f => f.files.length > 0);
+    if(!hayFoto){
+        alert("Debes subir al menos 1 foto");
+        return;
+    }
+
+    // Cambiar botón mientras sube
+    const btn=document.getElementById("btnGuardar");
+    btn.innerText="Subiendo imágenes...";
+    btn.style.background="#00b894";
+
+    const urls = await uploadAllFiles();
+
+    btn.innerText="Guardando producto...";
+    const producto = {
+        nombre: nombre,
+        descripcion: document.getElementById('descripcion').value,
+        precio: precio,
+        valoracion: valoracion,
+        estado: document.getElementById('estado').value,
+        visibilidad: document.getElementById('visibilidad').value,
+        img1: urls[0]||"",
+        img2: urls[1]||"",
+        img3: urls[2]||"",
+        img4: urls[3]||"",
+        img5: urls[4]||""
+    };
+
+    try{
+        const res=await fetch("https://script.google.com/macros/s/AKfycbz5jmczBym2G_VaClZiNriAqYTpF-6qDSnRzWhRaSNHtGlDHECy03PhJT0polNG00endw/exec",{
+            method:"POST",
+            body: JSON.stringify({action:"agregar", producto: producto})
+        });
+        const data = await res.json();
+        btn.innerText="Agregar Producto";
+        btn.style.background="#FF002F";
+        if(data.success){
+            alert("Producto agregado correctamente");
+            document.getElementById("formProducto").reset();
+            document.querySelectorAll(".preview").forEach(img=>img.src="");
+        }else{
+            alert("Error al guardar");
+        }
+    }catch(e){
+        btn.innerText="Agregar Producto";
+        btn.style.background="#FF002F";
+        alert("Error de conexión");
+    }
+}
+</script>  
+</body>  
+</html>
