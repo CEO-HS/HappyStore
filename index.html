@@ -1365,7 +1365,7 @@ btn.style.boxShadow = "none";
       nombre: producto[2],
       codigo: producto[1],
       precio: Number(producto[4]),
-      imagen: imagenVisible
+      imagen: producto[7] || ''
     };
 
     agregarAlCarrito(prodObj);
