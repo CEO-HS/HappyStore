@@ -1361,12 +1361,12 @@ btn.style.boxShadow = "none";
     // agregar al carrito
     const producto = listaProductos.find(p => p[1] === codigoProducto);
 
-    const prodObj = {
-      nombre: producto[2],
-      codigo: producto[1],
-      precio: Number(producto[4]),
-      imagen: producto[8] || ''
-    };
+  const prodObj = {
+  nombre: producto[2],
+  codigo: producto[1],
+  precio: Number(producto[4]),
+  imagen: obtenerPrimeraImagen(producto)
+};
 
     agregarAlCarrito(prodObj);
 
@@ -1378,6 +1378,15 @@ btn.style.boxShadow = "none";
     btn.innerText = "Comprar";
     btn.disabled = false;
   }
+
+function obtenerPrimeraImagen(producto){
+  for(let i = 8; i <= 12; i++){
+    if(producto[i] && producto[i].trim() !== "") return producto[i];
+  }
+  return ''; // si ninguna está disponible
+}
+   
+   
 }
 
   // BOTON COMPARTIR 
