@@ -105,17 +105,43 @@ toggleBtn.addEventListener("mouseleave",()=>{passInput.type="password";});
 toggleBtn.addEventListener("touchstart",()=>{passInput.type="text";});  
 toggleBtn.addEventListener("touchend",()=>{passInput.type="password";});  
   
-// -------- IMG UPLOAD PARALLEL --------  
+// -------- GENERA NOMBRES -------- 
+function generarNombreImagen(nombreProducto, codigoProducto, index){
+
+  return nombreProducto
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9áéíóúñ]+/g,"-")
+    .replace(/(^-|-$)/g,"")
+    + "-" +
+    codigoProducto.toLowerCase()
+    + "-" +
+    index +
+    ".webp";
+
+}
+
+  
+// -------- IMG UPLOAD PARALLEL -------- 
 const IMGBB_KEY="75e1c4c1e2ecce08add2221e38311f82";  
   
-async function uploadSingle(file){  
-    const formData=new FormData();  
-    formData.append("image",file);  
-    const res=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`,{method:"POST",body:formData});  
-    const data=await res.json();  
-    if(data.success) return data.data.url;  
-    else throw new Error("Error al subir imagen");  
-}  
+async function uploadSingle(file, fileName){
+
+    const formData = new FormData();
+
+    formData.append("image", file, fileName);
+
+    const res = await fetch(
+        `https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`,
+        { method:"POST", body:formData }
+    );
+
+    const data = await res.json();
+
+    if(data.success) return data.data.url;
+    else throw new Error("Error al subir imagen");
+
+} 
   
   // -------- REDUCE Y CONVIERTE IMÁGENES A WEBP --------
 function processImage(file, maxWidth = 1024, quality = 0.7) {
@@ -155,34 +181,52 @@ function processImage(file, maxWidth = 1024, quality = 0.7) {
 
 
     // -------- SUBIR IMAGEN PROSESADAS --------
-  
-async function uploadAllFiles() {
+  async function uploadAllFiles(codigoProducto) {
+
     const files = document.querySelectorAll(".fileInput");
     const urls = [];
+    const nombreProducto = document.getElementById("nombre").value;
+
+    let index = 1;
 
     for (const f of files) {
+
         if (f.files[0]) {
+
             try {
-                // 1️⃣ Procesa la imagen a WebP y reduce tamaño
+
                 const processedBlob = await processImage(f.files[0], 1024, 0.7);
 
-                // 2️⃣ Subir la imagen procesada
-                const url = await uploadSingle(processedBlob);
+                const fileName = generarNombreImagen(
+                    nombreProducto,
+                    codigoProducto,
+                    index
+                );
+
+                const url = await uploadSingle(processedBlob, fileName);
+
                 urls.push(url);
 
-                // 3️⃣ Actualizar preview
-                const imgPrev = document.getElementById(f.id.replace("file", "img"));
+                const imgPrev = document.getElementById(
+                    f.id.replace("file", "img")
+                );
                 imgPrev.src = url;
-                imgPrev.dataset.url = url;
+
+                index++;
+
             } catch (e) {
+
                 alert("Error subiendo imagen: " + f.id);
                 urls.push("");
+
             }
+
         } else urls.push("");
     }
 
     return urls;
 }
+
   
   
   
@@ -223,10 +267,28 @@ async function agregarProducto(){
     btn.innerText="Subiendo imágenes...";
     btn.style.background="#00b894";
 
-    const urls = await uploadAllFiles();
+
+
+// pedir codigo al Apps Script
+const resCodigo = await fetch("https://script.google.com/macros/s/AKfycbz5jmczBym2G_VaClZiNriAqYTpF-6qDSnRzWhRaSNHtGlDHECy03PhJT0polNG00endw/exec",{
+    method:"POST",
+    body: JSON.stringify({action:"generar_codigo"})
+});
+
+const dataCodigo = await resCodigo.json();
+
+const codigoProducto = dataCodigo.codigo;
+
+// subir imágenes con nombre SEO
+const urls = await uploadAllFiles(codigoProducto);
+  
+
+  
+
 
     btn.innerText="Guardando producto...";
     const producto = {
+        codigo: codigoProducto,
         nombre: nombre,
         descripcion: document.getElementById('descripcion').value,
         precio: precio,
